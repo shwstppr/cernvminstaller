@@ -36,6 +36,7 @@ class CVMISelectPage : public QWidget
     
     //QListWidget* availableReleases;
     QTableWidget* availableReleasesTbl;
+    QPushButton* retryPopButton;
 
     bool desktopChecked;
     bool basicChecked;
@@ -66,7 +67,11 @@ class CVMISelectPage : public QWidget
 
     void populateFinished();
     void populateReadyRead();
+    void retryPopulate();
 
     void deployClicked();
+
+  public slots:
+    void setProxy(QNetworkProxy proxy);
 };
 #endif // CVMISELECTPAGE_H

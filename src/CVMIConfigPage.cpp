@@ -61,9 +61,58 @@ CVMIConfigPage::CVMIConfigPage(QWidget* parent)
   configLayout->addWidget (resetButton, 7, 1);
 
   configGroupBox->setLayout(configLayout);
-  
+
+  useProxyCheck =  new QCheckBox("Use proxy", this);
+  useProxyBox =  new QGroupBox(this);
+  //useProxyBox->setFixedHeight(200);
+  proxyAddressLabel = new QLabel("Address", useProxyBox);
+  proxyAddressInput = new QLineEdit("127.0.0.1", useProxyBox);
+  proxyAddressInput->setInputMask("000.000.000.000");
+  proxyAddressInput->setFixedWidth(120);
+  proxyPortLabel = new QLabel("Port", useProxyBox);
+  proxyPortInput = new QLineEdit("80", useProxyBox);
+  proxyPortInput->setInputMask("0000D");
+  proxyPortInput->setFixedWidth(60);
+  proxyDetailsLayout =  new QGridLayout();
+  proxyDetailsLayout->addWidget(proxyAddressLabel, 0, 0, 1, 1);
+  proxyDetailsLayout->addWidget(proxyAddressInput, 0, 1, 1, 1);
+  proxyDetailsLayout->addWidget(proxyPortLabel, 0, 2, 1, 1);
+  proxyDetailsLayout->addWidget(proxyPortInput, 0, 3, 1, 1);
+  proxyAuthorizationCheck = new QCheckBox("Authorization", useProxyBox);
+  proxyAuthorizationCheck->setChecked(false);
+  proxyAuthorizationBox =  new QGroupBox(useProxyBox);
+  proxyUsernameLabel = new QLabel("Username", useProxyBox);
+  proxyUsernameInput = new QLineEdit("", useProxyBox);
+  proxyUsernameInput->setFixedWidth(120);
+  proxyPasswordLabel = new QLabel("Password", useProxyBox);
+  proxyPasswordInput = new QLineEdit("", useProxyBox);
+  proxyPasswordInput->setFixedWidth(120);
+  proxyPasswordInput->setEchoMode(QLineEdit::Password);
+  proxyAuthorizationLayout =  new QGridLayout();
+  proxyAuthorizationLayout->addWidget(proxyUsernameLabel, 0, 0);
+  proxyAuthorizationLayout->addWidget(proxyUsernameInput, 0, 1);
+  proxyAuthorizationLayout->addWidget(proxyPasswordLabel, 0, 2);
+  proxyAuthorizationLayout->addWidget(proxyPasswordInput, 0, 3);
+  proxyAuthorizationBox->setLayout(proxyAuthorizationLayout);
+  useProxyLayout =  new QVBoxLayout();
+  useProxyLayout->addLayout(proxyDetailsLayout);
+  useProxyLayout->addWidget(proxyAuthorizationCheck);
+  useProxyLayout->addWidget(proxyAuthorizationBox);
+
+  applyProxyButton = new QPushButton(tr("Apply"), useProxyBox);
+  applyProxyButton->setFixedWidth(80);
+  Q_ASSERT(connect(applyProxyButton, SIGNAL(clicked()), this, SLOT(applyProxyButtonClicked())));
+
+  useProxyLayout->addWidget(applyProxyButton);
+  useProxyBox->setLayout(useProxyLayout);
+  useProxyBox->setEnabled(false);
+  useProxyCheck->setChecked(false);
+  connect(useProxyCheck, SIGNAL(toggled(bool)), this, SLOT(useProxyCheckToggled(bool)));
+  connect(proxyAuthorizationCheck, SIGNAL(toggled(bool)), this, SLOT(proxyAuthorizationCheckToggled(bool)));
   //deployButton = new QPushButton(tr("Deploy"));
   mainLayout->addWidget(configGroupBox, 0, Qt::AlignTop);
+  mainLayout->addWidget(useProxyCheck);
+  mainLayout->addWidget(useProxyBox, 0);
   //mainLayout->addWidget(resetButton, 0, Qt::AlignRight | Qt::AlignTop); 
   //mainLayout->addSpacing(12);
 
@@ -139,5 +188,62 @@ void CVMIConfigPage::changeHypervisorDir()
   hypervisorDirEdit->setCursorPosition(0);
   conf.setHypervisorDir(dir);
   emit configChanged();
+}
+
+void CVMIConfigPage::useProxyCheckToggled(bool newValue)
+{
+    if(newValue)
+        useProxyBox->setEnabled(true);
+    else
+    {
+        proxyAddressInput->setText("127.0.0.1");
+        proxyPortInput->setText("80");
+        useProxyBox->setEnabled(false);
+    }
+}
+
+void CVMIConfigPage::proxyAuthorizationCheckToggled(bool newValue)
+{
+    if(newValue)
+    {
+        proxyAuthorizationBox->setEnabled(true);
+        if(!proxyAuthorizationCheck->isChecked())
+            proxyAuthorizationBox->setEnabled(false);
+    }
+    else
+    {
+        proxyUsernameInput->setText("");
+        proxyPasswordInput->setText("");
+        proxyAuthorizationBox->setEnabled(false);
+    }
+}
+
+void CVMIConfigPage::applyProxyButtonClicked()
+{
+    if(useProxyCheck->isChecked())
+    {
+        QNetworkProxy proxy;
+        //settings.setValue("ProxyCheck", "true");
+        //settings.setValue("Proxy Value", proxyAddressInput->text()+":"+proxyPortInput->text());
+        proxy.setType(QNetworkProxy::HttpProxy);
+        proxy.setHostName(proxyAddressInput->text());
+        proxy.setPort(proxyPortInput->text().toInt());
+        if(proxyAuthorizationCheck->isChecked())
+        {
+            //qDebug()<<"Authorization checked";
+            //settings.setValue("Proxy Authorization", "true");
+            if(!proxyUsernameInput->text().isEmpty())
+            {
+                //settings.setValue("Proxy Username", proxyUsernameInput->text());
+                proxy.setUser(proxyUsernameInput->text());
+            }
+            if(!proxyPasswordInput->text().isEmpty())
+            {
+                //settings.setValue("Proxy Password", proxyPasswordInput->text());
+                proxy.setPassword(proxyPasswordInput->text());
+            }
+        }
+    emit setProxy(proxy);
+    }
 }
 

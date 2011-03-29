@@ -57,6 +57,7 @@ CVMIDialog::CVMIDialog(QWidget* parent) : QDialog(parent) // : QDialog (0, Qt::W
 
   // Application icon
   this->setWindowIcon(QIcon(":images/application_icon.png"));
+  Q_ASSERT(connect(configPage, SIGNAL(setProxy(QNetworkProxy)), selectPage, SLOT(setProxy(QNetworkProxy))));
   verifyConfig();
 }
 

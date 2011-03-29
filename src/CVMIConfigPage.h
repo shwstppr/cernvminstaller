@@ -10,6 +10,7 @@
 
 #include <QWidget>
 #include <QtGui>
+#include <QNetworkProxy>
 #include "CVMIConfig.h"
 
 class CVMIConfigPage : public QWidget
@@ -19,6 +20,7 @@ class CVMIConfigPage : public QWidget
 signals:
   void displayOptionChanged();
   void configChanged();  
+  void setProxy(QNetworkProxy proxy);
 
 public:
   CVMIConfigPage(QWidget* parent = 0);
@@ -29,6 +31,9 @@ private slots:
   void changeHypervisorDir();
   void changeShowDevReleases(bool);
   void resetConfig();
+  void useProxyCheckToggled(bool);
+  void proxyAuthorizationCheckToggled(bool);
+  void applyProxyButtonClicked();
  
 private:
   QLineEdit* imageDirEdit;
@@ -36,6 +41,23 @@ private:
   QLineEdit* hypervisorDirEdit;
   QCheckBox* showDevCheckBox;   
   CVMIConfig conf;
+
+  QCheckBox *useProxyCheck;
+  QGroupBox *useProxyBox;
+  QVBoxLayout *useProxyLayout;
+  QGridLayout *proxyDetailsLayout;
+  QLabel *proxyAddressLabel;
+  QLineEdit *proxyAddressInput;
+  QLabel *proxyPortLabel;
+  QLineEdit *proxyPortInput;
+  QCheckBox *proxyAuthorizationCheck;
+  QGroupBox *proxyAuthorizationBox;
+  QGridLayout *proxyAuthorizationLayout;
+  QLabel *proxyUsernameLabel;
+  QLineEdit *proxyUsernameInput;
+  QLabel *proxyPasswordLabel;
+  QLineEdit *proxyPasswordInput;
+  QPushButton *applyProxyButton;
 };
 
 #endif // CVMICONFIGPAGE_H

@@ -63,10 +63,15 @@ availableImagesList("")
   availableReleasesTbl->setEditTriggers(QAbstractItemView::NoEditTriggers);
   availableReleasesTbl->setSelectionBehavior(QAbstractItemView::SelectRows);
   Q_ASSERT(connect(availableReleasesTbl,SIGNAL(itemClicked(QTableWidgetItem*)), this, SLOT(tblRowChanged(QTableWidgetItem *))));
-  
+
+  retryPopButton = new QPushButton("Retry", releaseGroupBox);
+  retryPopButton->setFixedWidth(75);
+  Q_ASSERT(connect(retryPopButton,SIGNAL(clicked()), this, SLOT(retryPopulate())));
+
   QVBoxLayout* releaseListLayout = new QVBoxLayout;
   //releaseListLayout->addWidget(availableReleases);
   releaseListLayout->addWidget(availableReleasesTbl);
+  releaseListLayout->addWidget(retryPopButton);
 
   releaseGroupBox->setLayout(releaseListLayout);
   //Q_ASSERT(connect (availableReleases, SIGNAL(currentRowChanged(int)), this, SLOT(rowChanged(int))));  
@@ -111,6 +116,7 @@ void CVMISelectPage::populateList()
     return;
   }  
 
+  retryPopButton->setEnabled(false);
   populateInProgress = true;
 
   qDebug() << "_populate_ ()";
@@ -131,6 +137,7 @@ void CVMISelectPage::populateFinished()
 {
 
   qDebug() << "_populate_ Finished";
+  retryPopButton->setEnabled(true);
   populateInProgress = false;
   CVMIRelease listEntry;
   unsigned int id = 0;
@@ -291,6 +298,16 @@ void CVMISelectPage::desktopToggled(bool checked)
 void CVMISelectPage::displayOptionChanged()
 {
   populateList();
+}
+
+void CVMISelectPage::setProxy(QNetworkProxy proxy)
+{
+    qnam.setProxy(proxy);
+}
+
+void CVMISelectPage::retryPopulate()
+{
+    populateList();
 }
 
 
