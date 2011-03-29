@@ -4,3 +4,7 @@ build/
 *.so
 *.o
 *.pro
+contribs/bin/
+contribs/downloads/
+contribs/include/
+contribs/lib/
